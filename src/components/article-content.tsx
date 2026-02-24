@@ -2,15 +2,7 @@
 
 import { memo } from "react";
 import { motion } from "motion/react";
-
-const iosEase = [0.32, 0.72, 0, 1] as const;
-
-const fadeIn = {
-  initial: { opacity: 0, y: 8 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-40px" },
-  transition: { duration: 0.5, ease: iosEase },
-};
+import { fadeIn } from "@/lib/motion";
 
 function Code({ children }: { children: React.ReactNode }) {
   return (
@@ -65,6 +57,50 @@ function Callout({ children }: { children: React.ReactNode }) {
       <p className="text-[13px] leading-relaxed text-foreground/40 italic">
         {children}
       </p>
+    </div>
+  );
+}
+
+function ComparisonTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
+  return (
+    <div className="overflow-x-auto pt-2">
+      <table className="w-full text-[12px]">
+        <thead>
+          <tr className="border-b border-foreground/[0.06]">
+            {headers.map((h) => (
+              <th key={h} className="text-left font-mono text-foreground/30 pb-2 pr-4 last:pr-0">
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="text-foreground/45">
+          {rows.map((row) => (
+            <tr key={row[0]} className="border-b border-foreground/[0.03]">
+              {row.map((cell, j) => (
+                <td
+                  key={j}
+                  className={`py-2 ${j === 0 ? "pr-4 font-mono text-foreground/50" : j < row.length - 1 ? "pr-4" : ""} ${j === row.length - 1 ? "text-foreground/55" : j > 0 ? "text-foreground/35" : ""}`}
+                >
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function StatCard({ label, value, description }: { label: string; value: string; description: string }) {
+  return (
+    <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] p-4 space-y-1">
+      <p className="text-[10px] font-mono text-foreground/30 uppercase tracking-wider">
+        {label}
+      </p>
+      <p className="text-[20px] font-heading text-foreground/60">{value}</p>
+      <p className="text-[11px] text-foreground/30">{description}</p>
     </div>
   );
 }
@@ -202,35 +238,9 @@ export const ArticleContent = memo(function ArticleContent() {
           sending over the wire.
         </Paragraph>
         <div className="grid grid-cols-3 gap-3 pt-2">
-          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] p-4 space-y-1">
-            <p className="text-[10px] font-mono text-foreground/30 uppercase tracking-wider">
-              8-bit
-            </p>
-            <p className="text-[20px] font-heading text-foreground/60">256</p>
-            <p className="text-[11px] text-foreground/30">
-              levels. Telephony only
-            </p>
-          </div>
-          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] p-4 space-y-1">
-            <p className="text-[10px] font-mono text-foreground/30 uppercase tracking-wider">
-              16-bit
-            </p>
-            <p className="text-[20px] font-heading text-foreground/60">
-              65,536
-            </p>
-            <p className="text-[11px] text-foreground/30">
-              levels. Voice AI standard
-            </p>
-          </div>
-          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] p-4 space-y-1">
-            <p className="text-[10px] font-mono text-foreground/30 uppercase tracking-wider">
-              32-bit float
-            </p>
-            <p className="text-[20px] font-heading text-foreground/60">24-bit</p>
-            <p className="text-[11px] text-foreground/30">
-              effective precision. Web Audio
-            </p>
-          </div>
+          <StatCard label="8-bit" value="256" description="levels. Telephony only" />
+          <StatCard label="16-bit" value="65,536" description="levels. Voice AI standard" />
+          <StatCard label="32-bit float" value="24-bit" description="effective precision. Web Audio" />
         </div>
         <Paragraph>
           Bandwidth math: 16 kHz &times; 16-bit &times; 1 channel = 256 kbps =
@@ -326,42 +336,16 @@ export const ArticleContent = memo(function ArticleContent() {
           React rendering, fetch completions, and event handlers. It&apos;s
           deprecated for good reason.
         </Paragraph>
-        <div className="overflow-x-auto pt-2">
-          <table className="w-full text-[12px]">
-            <thead>
-              <tr className="border-b border-foreground/[0.06]">
-                <th className="text-left font-mono text-foreground/30 pb-2 pr-4" />
-                <th className="text-left font-mono text-foreground/30 pb-2 pr-4">
-                  ScriptProcessorNode
-                </th>
-                <th className="text-left font-mono text-foreground/30 pb-2">
-                  AudioWorklet
-                </th>
-              </tr>
-            </thead>
-            <tbody className="text-foreground/45">
-              {[
-                ["Thread", "Main thread", "Dedicated audio thread"],
-                ["Latency", "High (blocked by JS)", "Low (real-time priority)"],
-                [
-                  "Buffer size",
-                  "Fixed (256-16384)",
-                  "128 samples (render quantum)",
-                ],
-                ["Status", "Deprecated", "Current standard"],
-                ["GC", "Shares heap with main thread", "Separate heap (still minimize allocs)"],
-              ].map(([label, old, current]) => (
-                <tr key={label} className="border-b border-foreground/[0.03]">
-                  <td className="py-2 pr-4 font-mono text-foreground/50">
-                    {label}
-                  </td>
-                  <td className="py-2 pr-4 text-foreground/35">{old}</td>
-                  <td className="py-2 text-foreground/55">{current}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ComparisonTable
+          headers={["", "ScriptProcessorNode", "AudioWorklet"]}
+          rows={[
+            ["Thread", "Main thread", "Dedicated audio thread"],
+            ["Latency", "High (blocked by JS)", "Low (real-time priority)"],
+            ["Buffer size", "Fixed (256-16384)", "128 samples (render quantum)"],
+            ["Status", "Deprecated", "Current standard"],
+            ["GC", "Shares heap with main thread", "Separate heap (still minimize allocs)"],
+          ]}
+        />
       </motion.section>
 
       {/* ── The Render Quantum ── */}
@@ -375,26 +359,8 @@ export const ArticleContent = memo(function ArticleContent() {
           between calls depends on the rate.
         </Paragraph>
         <div className="grid grid-cols-2 gap-3 pt-2">
-          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] p-4 space-y-1">
-            <p className="text-[10px] font-mono text-foreground/30 uppercase tracking-wider">
-              16 kHz context
-            </p>
-            <p className="text-[20px] font-heading text-foreground/60">8 ms</p>
-            <p className="text-[11px] text-foreground/30">
-              per process() call. 128 / 16,000
-            </p>
-          </div>
-          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] p-4 space-y-1">
-            <p className="text-[10px] font-mono text-foreground/30 uppercase tracking-wider">
-              48 kHz context
-            </p>
-            <p className="text-[20px] font-heading text-foreground/60">
-              2.67 ms
-            </p>
-            <p className="text-[11px] text-foreground/30">
-              per process() call. 128 / 48,000
-            </p>
-          </div>
+          <StatCard label="16 kHz context" value="8 ms" description="per process() call. 128 / 16,000" />
+          <StatCard label="48 kHz context" value="2.67 ms" description="per process() call. 128 / 48,000" />
         </div>
         <Paragraph>
           Anything that introduces non-deterministic latency inside{" "}
@@ -492,28 +458,8 @@ source.connect(captureWorkletNode);`}
           messages and React state.
         </Paragraph>
         <div className="grid grid-cols-2 gap-3 pt-2">
-          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] p-4 space-y-1">
-            <p className="text-[10px] font-mono text-foreground/30 uppercase tracking-wider">
-              Capture
-            </p>
-            <p className="text-[20px] font-heading text-foreground/60">
-              16 kHz
-            </p>
-            <p className="text-[11px] text-foreground/30">
-              Mic &rarr; Float32 &rarr; Int16 &rarr; base64 &rarr; Gemini
-            </p>
-          </div>
-          <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] p-4 space-y-1">
-            <p className="text-[10px] font-mono text-foreground/30 uppercase tracking-wider">
-              Playback
-            </p>
-            <p className="text-[20px] font-heading text-foreground/60">
-              24 kHz
-            </p>
-            <p className="text-[11px] text-foreground/30">
-              Gemini &rarr; base64 &rarr; Int16 &rarr; Float32 &rarr; Speaker
-            </p>
-          </div>
+          <StatCard label="Capture" value="16 kHz" description="Mic → Float32 → Int16 → base64 → Gemini" />
+          <StatCard label="Playback" value="24 kHz" description="Gemini → base64 → Int16 → Float32 → Speaker" />
         </div>
       </motion.section>
 
@@ -634,61 +580,17 @@ readIndex = 0;`}
           negotiation). We use WebSocket because Gemini Live&apos;s
           BidiGenerateContent API requires it.
         </Paragraph>
-        <div className="overflow-x-auto pt-2">
-          <table className="w-full text-[12px]">
-            <thead>
-              <tr className="border-b border-foreground/[0.06]">
-                <th className="text-left font-mono text-foreground/30 pb-2 pr-4">
-                  Aspect
-                </th>
-                <th className="text-left font-mono text-foreground/30 pb-2 pr-4">
-                  WebSocket
-                </th>
-                <th className="text-left font-mono text-foreground/30 pb-2">
-                  WebRTC
-                </th>
-              </tr>
-            </thead>
-            <tbody className="text-foreground/45">
-              {[
-                ["Protocol", "TCP (reliable, ordered)", "UDP (lower latency)"],
-                [
-                  "NAT traversal",
-                  "Easy (HTTP upgrade)",
-                  "Needs STUN/TURN",
-                ],
-                [
-                  "Audio codec",
-                  "You choose (raw PCM, Opus)",
-                  "Built-in Opus",
-                ],
-                [
-                  "Echo cancel",
-                  "Application-level",
-                  "Built-in via browser",
-                ],
-                [
-                  "Jitter buffer",
-                  "You implement",
-                  "Built-in",
-                ],
-                [
-                  "Best for",
-                  "Server-side agents, Gemini",
-                  "Client-side, OpenAI Realtime",
-                ],
-              ].map(([aspect, ws, rtc]) => (
-                <tr key={aspect} className="border-b border-foreground/[0.03]">
-                  <td className="py-2 pr-4 font-mono text-foreground/50">
-                    {aspect}
-                  </td>
-                  <td className="py-2 pr-4">{ws}</td>
-                  <td className="py-2">{rtc}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ComparisonTable
+          headers={["Aspect", "WebSocket", "WebRTC"]}
+          rows={[
+            ["Protocol", "TCP (reliable, ordered)", "UDP (lower latency)"],
+            ["NAT traversal", "Easy (HTTP upgrade)", "Needs STUN/TURN"],
+            ["Audio codec", "You choose (raw PCM, Opus)", "Built-in Opus"],
+            ["Echo cancel", "Application-level", "Built-in via browser"],
+            ["Jitter buffer", "You implement", "Built-in"],
+            ["Best for", "Server-side agents, Gemini", "Client-side, OpenAI Realtime"],
+          ]}
+        />
       </motion.section>
 
       {/* ── Blob Frames ── */}
@@ -735,38 +637,16 @@ readIndex = 0;`}
           separate STT, LLM, and TTS services are wired together. This demo
           uses S2S via Gemini Live.
         </Paragraph>
-        <div className="overflow-x-auto pt-2">
-          <table className="w-full text-[12px]">
-            <thead>
-              <tr className="border-b border-foreground/[0.06]">
-                <th className="text-left font-mono text-foreground/30 pb-2 pr-4" />
-                <th className="text-left font-mono text-foreground/30 pb-2 pr-4">
-                  S2S
-                </th>
-                <th className="text-left font-mono text-foreground/30 pb-2">
-                  Chained
-                </th>
-              </tr>
-            </thead>
-            <tbody className="text-foreground/45">
-              {[
-                ["Latency", "Lower (one model)", "Higher (3+ hops)"],
-                ["Naturalness", "Hears tone & pacing", "Text-only between stages"],
-                ["Control", "Opaque", "Swap any component"],
-                ["Debugging", "Hard (audio in/out)", "Easy (text at each stage)"],
-                ["Cost", "Single API call", "STT + LLM + TTS"],
-              ].map(([label, s2s, chained]) => (
-                <tr key={label} className="border-b border-foreground/[0.03]">
-                  <td className="py-2 pr-4 font-mono text-foreground/50">
-                    {label}
-                  </td>
-                  <td className="py-2 pr-4">{s2s}</td>
-                  <td className="py-2">{chained}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ComparisonTable
+          headers={["", "S2S", "Chained"]}
+          rows={[
+            ["Latency", "Lower (one model)", "Higher (3+ hops)"],
+            ["Naturalness", "Hears tone & pacing", "Text-only between stages"],
+            ["Control", "Opaque", "Swap any component"],
+            ["Debugging", "Hard (audio in/out)", "Easy (text at each stage)"],
+            ["Cost", "Single API call", "STT + LLM + TTS"],
+          ]}
+        />
       </motion.section>
 
       {/* ── Latency Budget ── */}

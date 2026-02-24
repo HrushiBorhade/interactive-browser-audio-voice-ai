@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
 import { VoiceOrb } from "@/components/voice-orb";
-import { useGeminiLive } from "@/hooks/use-gemini-live";
-import { ArchitectureFlow } from "@/components/architecture-flow";
-import { ArticleContent } from "@/components/article-content";
+import { useGeminiLive, SYSTEM_INSTRUCTION } from "@/hooks/use-gemini-live";
+import { useMounted } from "@/hooks/use-mounted";
+import { iosEase } from "@/lib/motion";
+import { demoTools } from "@/lib/tools";
+import type { Phase } from "@/lib/types";
 import {
   Select,
   SelectContent,
@@ -14,6 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+const ArchitectureFlow = dynamic(
+  () => import("@/components/architecture-flow").then((m) => ({ default: m.ArchitectureFlow })),
+  { ssr: false }
+);
+
+const ArticleContent = dynamic(
+  () => import("@/components/article-content").then((m) => ({ default: m.ArticleContent })),
+  { ssr: false }
+);
 
 const VOICES = [
   "Puck",
@@ -26,24 +39,25 @@ const VOICES = [
   "Zephyr",
 ] as const;
 
-/* iOS-native curve from Vaul (Emil Kowalski) */
-const iosEase = [0.32, 0.72, 0, 1] as const;
+const TOOL_NAMES = demoTools.map((t) => t.name);
 
-const TOOLS = ["get_current_time", "get_weather", "roll_dice"];
+const STATUS_TEXT: Record<Phase, string> = {
+  idle: "Tap to start",
+  connecting: "Connecting",
+  listening: "Listening",
+  speaking: "Speaking",
+  thinking: "Thinking",
+};
 
-const SYSTEM_PROMPT_PREVIEW =
-  "You are a helpful, friendly voice assistant. Keep responses concise and conversational...";
-
-type Phase = "idle" | "connecting" | "listening" | "speaking" | "thinking";
+const CONTROL_BASE =
+  "h-9 rounded-full border border-foreground/[0.08] bg-foreground/[0.04] backdrop-blur-md text-foreground/40 transition-colors duration-200 hover:bg-foreground/[0.08] hover:border-foreground/[0.14] hover:text-foreground/70";
 
 export default function Home() {
   const [voice, setVoice] = useState<string>("Puck");
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const { theme, setTheme } = useTheme();
   const { connectionState, personaState, error, connect, disconnect, dismissError } =
     useGeminiLive(voice);
-
-  useEffect(() => setMounted(true), []);
 
   // Auto-dismiss error after 6 seconds
   useEffect(() => {
@@ -62,15 +76,29 @@ export default function Home() {
       ? personaState
       : "idle";
 
-  const controlBase =
-    "h-9 rounded-full border border-foreground/[0.08] bg-foreground/[0.04] backdrop-blur-md text-foreground/40 transition-colors duration-200 hover:bg-foreground/[0.08] hover:border-foreground/[0.14] hover:text-foreground/70";
+  const orbAnimate = useMemo(
+    () => ({
+      opacity: 1,
+      scale: isConnected
+        ? personaState === "speaking"
+          ? 1.04
+          : personaState === "thinking"
+            ? 0.97
+            : 1
+        : isConnecting
+          ? 0.96
+          : 1,
+      filter: isConnecting ? "blur(2px)" : "blur(0px)",
+    }),
+    [isConnected, isConnecting, personaState]
+  );
 
   return (
     <main className="relative bg-background">
       {/* Theme toggle */}
       <button
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        className="fixed top-4 right-4 z-50 size-8 rounded-full border border-foreground/[0.08] bg-foreground/[0.04] backdrop-blur-md flex items-center justify-center text-foreground/50 hover:text-foreground/80 hover:border-foreground/[0.14] transition-colors duration-200 cursor-pointer"
+        className={`${CONTROL_BASE} fixed top-4 right-4 z-50 size-8 flex items-center justify-center cursor-pointer`}
         aria-label="Toggle theme"
       >
         {mounted && (
@@ -173,19 +201,7 @@ export default function Home() {
               {/* Orb */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.92 }}
-                animate={{
-                  opacity: 1,
-                  scale: isConnected
-                    ? personaState === "speaking"
-                      ? 1.04
-                      : personaState === "thinking"
-                        ? 0.97
-                        : 1
-                    : isConnecting
-                      ? 0.96
-                      : 1,
-                  filter: isConnecting ? "blur(2px)" : "blur(0px)",
-                }}
+                animate={orbAnimate}
                 transition={{ duration: 0.6, ease: iosEase }}
               >
                 <VoiceOrb
@@ -204,7 +220,7 @@ export default function Home() {
                 <motion.button
                   onClick={isConnected ? disconnect : connect}
                   disabled={isConnecting}
-                  className={`${controlBase} w-9 flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed`}
+                  className={`${CONTROL_BASE} w-9 flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed`}
                   aria-label={isConnected ? "Stop" : "Start"}
                   whileTap={{ scale: 0.92 }}
                   transition={{ duration: 0.15, ease: iosEase }}
@@ -258,7 +274,7 @@ export default function Home() {
                     >
                       <Select value={voice} onValueChange={setVoice}>
                         <SelectTrigger
-                          className={`${controlBase} min-w-[100px] px-4 gap-1.5 font-mono text-[10px] tracking-wider uppercase`}
+                          className={`${CONTROL_BASE} min-w-[100px] px-4 gap-1.5 font-mono text-[10px] tracking-wider uppercase`}
                         >
                           <SelectValue />
                         </SelectTrigger>
@@ -278,19 +294,14 @@ export default function Home() {
               {/* Status text */}
               <AnimatePresence mode="wait">
                 <motion.p
-                  key={isConnected ? personaState : connectionState}
+                  key={phase}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2, ease: iosEase }}
                   className="text-[11px] tracking-[0.1em] uppercase text-muted-foreground/40 font-mono h-4"
                 >
-                  {isDisconnected && "Tap to start"}
-                  {isConnecting && "Connecting"}
-                  {isConnected && personaState === "listening" && "Listening"}
-                  {isConnected && personaState === "speaking" && "Speaking"}
-                  {isConnected && personaState === "thinking" && "Thinking"}
-                  {isConnected && personaState === "idle" && ""}
+                  {STATUS_TEXT[phase]}
                 </motion.p>
               </AnimatePresence>
 
@@ -306,7 +317,7 @@ export default function Home() {
                     Tools
                   </p>
                   <div className="flex flex-wrap justify-center gap-1.5">
-                    {TOOLS.map((tool) => (
+                    {TOOL_NAMES.map((tool) => (
                       <span
                         key={tool}
                         className="text-[9px] font-mono text-foreground/25 bg-foreground/[0.03] border border-foreground/[0.05] rounded-full px-2.5 py-1 tracking-wider"
@@ -321,7 +332,7 @@ export default function Home() {
                     System Prompt
                   </p>
                   <p className="text-[10px] text-foreground/20 text-center leading-relaxed px-2 line-clamp-2">
-                    {SYSTEM_PROMPT_PREVIEW}
+                    {SYSTEM_INSTRUCTION}
                   </p>
                 </div>
               </motion.div>

@@ -2,14 +2,12 @@
 
 import { memo } from "react";
 import { motion } from "motion/react";
-
-type Phase = "idle" | "connecting" | "listening" | "speaking" | "thinking";
+import { iosEase } from "@/lib/motion";
+import type { Phase } from "@/lib/types";
 
 interface Props {
   phase: Phase;
 }
-
-const iosEase = [0.32, 0.72, 0, 1] as const;
 
 const container = {
   hidden: {},

@@ -23,7 +23,7 @@ interface UseGeminiLiveReturn {
 const GEMINI_WS_URL =
   "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent";
 
-const SYSTEM_INSTRUCTION =
+export const SYSTEM_INSTRUCTION =
   "You are a helpful, friendly voice assistant. Keep your responses concise and conversational since this is a voice interface. You have access to tools for getting the current time, checking weather, and rolling dice. Use them when relevant.";
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {

@@ -1,10 +1,33 @@
 "use client"
 
 import * as React from "react"
-import { Select as SelectPrimitive } from "radix-ui"
+import * as SelectPrimitive from "@radix-ui/react-select"
 
 import { cn } from "@/lib/utils"
-import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
+
+function ChevronDownIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  )
+}
+
+function ChevronUpIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="m18 15-6-6-6 6" />
+    </svg>
+  )
+}
+
+function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  )
+}
 
 function Select({
   ...props
