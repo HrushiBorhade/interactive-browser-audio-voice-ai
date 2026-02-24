@@ -45,7 +45,7 @@ export function GitHubHoverCard({
   );
 
   return (
-    <HoverCard openDelay={300} closeDelay={150} onOpenChange={handleOpenChange}>
+    <HoverCard openDelay={0} closeDelay={100} onOpenChange={handleOpenChange}>
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
       <HoverCardContent side="top" sideOffset={10} className="w-72">
         {user ? (
