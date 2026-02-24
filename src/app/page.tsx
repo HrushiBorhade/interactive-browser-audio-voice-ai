@@ -185,6 +185,22 @@ export default function Home() {
           ring buffers, and cross-thread echo suppression. Built from
           first principles, not abstractions.
         </motion.p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, ease: iosEase, delay: 0.2 }}
+          className="text-[11px] font-mono text-foreground/20 mt-5 tracking-wider"
+        >
+          built by{" "}
+          <a
+            href="https://github.com/HrushiBorhade"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground/35 hover:text-foreground/60 transition-colors duration-200 underline underline-offset-2 decoration-foreground/10 hover:decoration-foreground/30"
+          >
+            Hrushi Borhade
+          </a>
+        </motion.p>
       </header>
 
       {/* ── Interactive demo ── */}
