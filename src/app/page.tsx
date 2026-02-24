@@ -189,16 +189,17 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, ease: iosEase, delay: 0.2 }}
-          className="text-[11px] font-mono text-foreground/20 mt-5 tracking-wider"
+          className="text-[11px] font-mono text-foreground/25 mt-5 tracking-wider"
         >
           built by{" "}
           <a
             href="https://github.com/HrushiBorhade"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-foreground/35 hover:text-foreground/60 transition-colors duration-200 underline underline-offset-2 decoration-foreground/10 hover:decoration-foreground/30"
+            className="inline-flex items-center gap-1 text-foreground/40 hover:text-foreground/65 transition-colors duration-200 underline underline-offset-2 decoration-foreground/15 hover:decoration-foreground/35"
           >
             Hrushi Borhade
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><path d="M7 17L17 7M17 7H7M17 7v10" /></svg>
           </a>
         </motion.p>
       </header>
