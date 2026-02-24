@@ -439,6 +439,22 @@
     animation: flow-packet-right 1s ease-in-out infinite;
   }
 
+  /* ---- Hover card ---- */
+  [data-slot="hover-card-content"] {
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  /* ---- Contribution graph ---- */
+  .contribution-graph {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+
+  .dark .contribution-graph {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
 } /* end @layer components */
 
 /* ---- Keyframes ---- */

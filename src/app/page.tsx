@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { GitHubHoverCard } from "@/components/github-hover-card";
 
 const ArchitectureFlow = dynamic(
   () => import("@/components/architecture-flow").then((m) => ({ default: m.ArchitectureFlow })),
@@ -192,15 +193,17 @@ export default function Home() {
           className="text-[11px] font-mono text-foreground/25 mt-5 tracking-wider"
         >
           built by{" "}
-          <a
-            href="https://github.com/HrushiBorhade"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-foreground/40 hover:text-foreground/65 transition-colors duration-200 underline underline-offset-2 decoration-foreground/15 hover:decoration-foreground/35"
-          >
-            Hrushi Borhade
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><path d="M7 17L17 7M17 7H7M17 7v10" /></svg>
-          </a>
+          <GitHubHoverCard username="HrushiBorhade">
+            <a
+              href="https://github.com/HrushiBorhade"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-foreground/40 hover:text-foreground/65 transition-colors duration-200 underline underline-offset-2 decoration-foreground/15 hover:decoration-foreground/35"
+            >
+              Hrushi Borhade
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-60"><path d="M7 17L17 7M17 7H7M17 7v10" /></svg>
+            </a>
+          </GitHubHoverCard>
         </motion.p>
       </header>
 
