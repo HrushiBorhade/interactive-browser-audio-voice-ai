@@ -228,7 +228,9 @@ export function useGeminiLive(voice: string = "Puck"): UseGeminiLiveReturn {
       playbackNodeRef.current = playbackNode;
       playbackNode.connect(playbackCtx.destination);
 
-      // Software echo suppression
+      // Track playback state for UI — mic stays open so Gemini's
+      // server-side VAD can detect interruptions (barge-in).
+      // Browser echoCancellation handles feedback suppression.
       playbackNode.port.onmessage = (e) => {
         if (!mountedRef.current) return;
         const isStart = e.data.type === "playbackStart";
@@ -236,10 +238,6 @@ export function useGeminiLive(voice: string = "Puck"): UseGeminiLiveReturn {
         if (!isStart && !isStop) return;
 
         setVoiceOrbState(isStart ? "speaking" : "listening");
-        captureNodeRef.current?.port.postMessage({
-          type: "mute",
-          value: isStart,
-        });
       };
 
       // Connect WebSocket to Gemini

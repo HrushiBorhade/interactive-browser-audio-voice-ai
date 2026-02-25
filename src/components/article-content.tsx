@@ -521,48 +521,55 @@ readIndex = 0;`}
         </Callout>
       </motion.section>
 
-      {/* ── Echo Suppression ── */}
+      {/* ── Echo Cancellation & Barge-in ── */}
       <motion.section className="space-y-4" {...fadeIn}>
         <SectionLabel>Audio Safety</SectionLabel>
-        <SectionHeading>Software echo suppression</SectionHeading>
+        <SectionHeading>Echo cancellation and barge-in</SectionHeading>
         <Paragraph>
-          Without echo suppression, the microphone picks up the AI&apos;s voice
+          Without echo cancellation, the microphone picks up the AI&apos;s voice
           from the speakers. Gemini hears itself, responds to its own output,
-          and enters a feedback loop. Browser AEC{" "}
-          (<Code>echoCancellation: true</Code>) helps but fails with external
-          speakers, Bluetooth devices, or high-latency audio paths.
+          and enters a feedback loop. The browser&apos;s built-in AEC
+          (<Code>echoCancellation: true</Code> on getUserMedia) solves this at
+          the hardware/OS level — a DSP algorithm subtracts the known speaker
+          output from the mic input in real-time.
         </Paragraph>
         <Paragraph>
-          The fix crosses all three threads: the playback worklet detects audio
-          output (playbackStart) &rarr; signals the main thread &rarr; main
-          thread sends a mute command to the capture worklet. When the ring
-          buffer drains (playbackStop), the process reverses and the mic
-          reopens.
+          This is critical for <strong>barge-in</strong> — the ability to
+          interrupt the AI mid-sentence. The mic must stay open while the AI
+          speaks so Gemini&apos;s server-side VAD (Voice Activity Detection) can
+          hear you. When it detects your voice, it sends{" "}
+          <Code>serverContent.interrupted</Code>, we clear the playback ring
+          buffer, and you have the floor instantly.
         </Paragraph>
         <div className="rounded-xl border border-foreground/[0.06] bg-foreground/[0.03] p-4 space-y-3">
           <div className="flex items-center gap-3">
             <span className="size-2 rounded-full bg-foreground/20" />
             <span className="text-[12px] font-mono text-foreground/40">
-              Playback worklet &rarr;{" "}
-              <span className="text-foreground/60">playbackStart</span> &rarr;
-              Main thread
+              Browser AEC &rarr;{" "}
+              <span className="text-foreground/60">strips speaker audio from mic</span>
             </span>
           </div>
           <div className="flex items-center gap-3">
             <span className="size-2 rounded-full bg-foreground/20" />
             <span className="text-[12px] font-mono text-foreground/40">
-              Main thread &rarr;{" "}
-              <span className="text-foreground/60">mute: true</span> &rarr;
-              Capture worklet
+              Gemini VAD &rarr;{" "}
+              <span className="text-foreground/60">serverContent.interrupted</span> &rarr;
+              Client
             </span>
           </div>
           <div className="flex items-center gap-3">
             <span className="size-2 rounded-full bg-foreground/10" />
             <span className="text-[12px] font-mono text-foreground/30">
-              capture process() &rarr; returns immediately, no audio sent
+              playback ring buffer &rarr; clear (writeIndex = readIndex = 0)
             </span>
           </div>
         </div>
+        <Callout>
+          A naive approach is to mute the mic while the AI speaks. This prevents
+          echo but completely kills barge-in — the user can&apos;t interrupt
+          because Gemini never hears them. Always prefer browser AEC over mic
+          muting.
+        </Callout>
       </motion.section>
 
       {/* ═══════════════════════════════════════════

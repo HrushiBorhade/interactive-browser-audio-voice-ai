@@ -111,7 +111,7 @@ function EchoBadge({ active }: { active: boolean }) {
       data-active={active}
       className={`mt-3 text-[7.5px] font-mono border border-dashed rounded-full px-3 py-1.5 transition-all duration-300 ${active ? "text-foreground/40 border-foreground/[0.18]" : "text-foreground/22 border-foreground/[0.10]"}`}
     >
-      Echo suppression · playback → main thread → capture mute
+      Echo cancellation · browser AEC + Gemini VAD barge-in
     </div>
   );
 }

@@ -18,7 +18,7 @@ Topics covered:
 - Mic capture with getUserMedia and AudioWorklet processors
 - Three-thread architecture (main, capture, playback)
 - Ring buffers with monotonic write/read indices for gapless playback
-- Cross-thread echo suppression via mute signals
+- Browser AEC (echo cancellation) with Gemini server-side VAD for barge-in
 - Float32 to Int16 PCM conversion
 - WebSocket transport to Gemini Live API (BidiGenerateContent)
 - S2S vs Chained Pipeline architectures
@@ -123,7 +123,7 @@ public/
 2. The app fetches an API token, sets up two AudioContexts, loads AudioWorklet processors, and opens a WebSocket to Gemini
 3. Mic audio flows through the capture worklet (16kHz mono PCM), gets base64-encoded, and streams to Gemini via WebSocket
 4. Gemini responds with audio chunks that get decoded and fed into the playback worklet's ring buffer
-5. The playback worklet signals playback start/stop to the main thread, which mutes the capture worklet during playback (echo suppression)
+5. The mic stays open during playback — browser AEC strips echo, and Gemini's server-side VAD detects interruptions (barge-in) to let you interrupt mid-sentence
 6. Tool calls (time, weather, dice) are handled client-side and responses sent back to Gemini
 
 ## Author
