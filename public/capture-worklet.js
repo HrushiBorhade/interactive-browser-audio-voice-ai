@@ -4,18 +4,11 @@ class CaptureProcessor extends AudioWorkletProcessor {
     this.FRAME_SIZE = 2048;
     this.buffer = new Float32Array(this.FRAME_SIZE * 4);
     this.writeIndex = 0;
-    this.muted = false;
-
-    this.port.onmessage = (e) => {
-      if (e.data.type === "mute") {
-        this.muted = e.data.value;
-      }
-    };
   }
 
   process(inputs) {
     const input = inputs[0]?.[0];
-    if (!input || this.muted) return true;
+    if (!input) return true;
 
     if (this.writeIndex + input.length > this.buffer.length) {
       const newBuffer = new Float32Array(this.buffer.length * 2);

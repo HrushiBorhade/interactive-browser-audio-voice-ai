@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Instrument_Serif, Geist_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AnalyticsProvider } from "@/components/analytics";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -24,12 +23,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Browser Audio for Voice AI | Interactive Deep Dive",
   description:
-    "From the physics of digital audio to a live voice agent. Raw WebSockets, AudioWorklet processors on real-time threads, ring buffers, and cross-thread echo suppression. Built from first principles.",
+    "From the physics of digital audio to a live voice agent. Raw WebSockets, AudioWorklet processors on real-time threads, ring buffers, and browser echo cancellation with barge-in. Built from first principles.",
   authors: [{ name: "Hrushi Borhade", url: "https://github.com/HrushiBorhade" }],
   openGraph: {
     title: "Browser Audio for Voice AI",
     description:
-      "Interactive deep dive into browser audio architecture for voice AI. AudioWorklets, ring buffers, Gemini Live, and cross-thread echo suppression.",
+      "Interactive deep dive into browser audio architecture for voice AI. AudioWorklets, ring buffers, Gemini Live, and browser echo cancellation with barge-in.",
     type: "article",
     url: "https://github.com/HrushiBorhade/interactive-browser-audio-voice-ai",
   },
@@ -52,8 +51,7 @@ export default function RootLayout({
         className={`${dmSans.variable} ${instrumentSerif.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <ThemeProvider>{children}</ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
+        <AnalyticsProvider />
       </body>
     </html>
   );

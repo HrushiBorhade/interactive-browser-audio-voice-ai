@@ -183,7 +183,7 @@ export default function Home() {
         >
           From the physics of digital audio to a live voice agent.
           Raw WebSockets, AudioWorklet processors on real-time threads,
-          ring buffers, and cross-thread echo suppression. Built from
+          ring buffers, and browser echo cancellation with barge-in. Built from
           first principles, not abstractions.
         </motion.p>
         <motion.p
